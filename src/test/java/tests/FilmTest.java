@@ -2,7 +2,6 @@ package tests;
 
 import org.testng.annotations.Test;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.ValidateService;
 
 import java.time.LocalDate;

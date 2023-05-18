@@ -15,7 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class FilmController {
-    final FilmRepository repository;
+    private final FilmRepository repository;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

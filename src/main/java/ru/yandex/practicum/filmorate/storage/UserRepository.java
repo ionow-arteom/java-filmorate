@@ -15,7 +15,7 @@ public class UserRepository {
     private long generatorId;
     private Map<Long, User> users = new HashMap<>();
 
-    public long generateId() {
+    private long generateId() {
         return ++generatorId;
     }
 

@@ -15,7 +15,7 @@ public class FilmRepository {
     private long generatorId;
     private Map<Long, Film> films = new HashMap();
 
-    public long generateId() {
+    private long generateId() {
         return ++generatorId;
     }
 

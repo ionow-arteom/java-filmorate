@@ -16,7 +16,7 @@ import java.util.List;
 @Slf4j
 public class UserController {
 
-    final UserRepository repository;
+    private final UserRepository repository;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

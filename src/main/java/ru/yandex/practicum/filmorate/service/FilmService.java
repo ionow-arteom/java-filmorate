@@ -30,14 +30,13 @@ public class FilmService {
     }
 
     public Film addLike(Long id, Long userId) {
+        if (userId == null) {
+            throw new UserNotFoundException(String.format("Пользователь %s не найден", userId));
+        }
         Film film = filmStorage.getFilmById(id);
         ValidateService.validateId(id);
         ValidateService.validateId(userId);
         Set<Long> like = film.getLike();
-
-        if (userId == null) {
-            throw new UserNotFoundException(String.format("Пользователь %s не найден", userId));
-        }
         like.add(userId);
         return filmStorage.update(film);
     }

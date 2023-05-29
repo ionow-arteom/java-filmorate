@@ -14,7 +14,7 @@ class UserTest {
         ValidateService validateService = new ValidateService();
         User user = new User();
         user.setEmail(" ");
-        assertThrows(RuntimeException.class, () -> ValidateService.validateUser(user));
+        assertThrows(RuntimeException.class, () -> ValidateService.validateId(user));
     }
 
     @Test
@@ -23,7 +23,7 @@ class UserTest {
         User user = new User();
         user.setEmail("email@list.ru");
         user.setLogin(" ");
-        assertThrows(RuntimeException.class, () -> ValidateService.validateUser(user));
+        assertThrows(RuntimeException.class, () -> ValidateService.validateId(user));
     }
 
     @Test
@@ -33,7 +33,7 @@ class UserTest {
         user.setEmail("email@list.ru");
         user.setLogin("login");
         user.setName(" ");
-        assertThrows(RuntimeException.class, () -> ValidateService.validateUser(user));
+        assertThrows(RuntimeException.class, () -> ValidateService.validateId(user));
     }
 
     @Test
@@ -44,6 +44,6 @@ class UserTest {
         user.setLogin("login");
         user.setName("");
         user.setBirthday(LocalDate.of(2045, 5, 5));
-        assertThrows(RuntimeException.class, () -> ValidateService.validateUser(user));
+        assertThrows(RuntimeException.class, () -> ValidateService.validateId(user));
     }
 }

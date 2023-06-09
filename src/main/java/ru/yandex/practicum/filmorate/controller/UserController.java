@@ -1,67 +1,80 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.service.ValidateService;
 
-import java.util.List;
+import java.util.Collection;
 
 @RestController
-@RequestMapping("/users")
-@RequiredArgsConstructor
 @Slf4j
+@RequestMapping("/users")
 public class UserController {
+
     private final UserService userService;
 
-    @GetMapping("/{id}")
-    public User getUser(@PathVariable Long id) {
-        log.info("Get user by id = {}", id);
-        ValidateService.validateId(id);
-        return userService.getUserById(id);
-    }
-
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public User create(@RequestBody User user) {
-        log.info("create user: {}", user);
-        ValidateService.validateId(user);
-        return userService.save(user);
-
-    }
-
-    @PutMapping
-    public User update(@RequestBody User user) {
-        ValidateService.validateId(user);
-        return userService.update(user);
+    public UserController(@Autowired(required = false) UserService userService) {
+        this.userService = userService;
     }
 
     @GetMapping
-    public List<User> getUsers() {
-        log.info("Текущее количество users: {}", userService.getUsers().size());
-        return userService.getUsers();
-    }
-
-    @PutMapping("/{id}/friends/{friendId}")
-    public User addFriend(@PathVariable Long id, @PathVariable Long friendId) {
-        return userService.addFriend(id, friendId);
-    }
-
-    @DeleteMapping("/{id}/friends/{friendId}")
-    public User deleteFriendById(@PathVariable Long id, @PathVariable Long friendId) {
-        return userService.deleteFriendById(id, friendId);
+    public Collection<User> findAll() {
+        log.info("Получен запрос GET к эндпоинту: /users");
+        return userService.getAllUsers();
     }
 
     @GetMapping("/{id}/friends")
-    public List<User> getFriendById(@PathVariable Long id) {
-        return userService.getFriendsList(id);
+    public Collection<User> findFriends(@PathVariable String id){
+        log.info("Получен запрос GET к эндпоинту: /users/{}/friends", id);
+        return userService.getFriends(id);
     }
 
-    @GetMapping("/{id}/friends/common/{friendId}")
-    public List<User> getCommonFriends(@PathVariable Long id, @PathVariable Long friendId) {
-        return userService.getCommonFriends(id, friendId);
+    @GetMapping("/{id}")
+    public User findUser(@PathVariable String id){
+        log.info("Получен запрос GET к эндпоинту: /users/{}/", id);
+        return userService.getUser(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public Collection<User> findCommonFriends(@PathVariable String id, @PathVariable String otherId){
+        log.info("Получен запрос GET к эндпоинту: /users/{}/friends/common/{}", id, otherId);
+        return userService.getCommonFriends(id, otherId);
+    }
+
+    @PostMapping
+    public User create(@RequestBody User user) {
+        log.info("Получен запрос POST. Данные тела запроса: {}", user);
+        final User validUser = userService.add(user);
+        log.info("Создан объект {} с id {}", User.class.getSimpleName(), validUser.getId());
+        return validUser;
+    }
+
+    @PutMapping
+    public User put(@RequestBody User user) {
+        log.info("Получен запрос PUT. Данные тела запроса: {}", user);
+        final User validUser = userService.update(user);
+        log.info("Обновлен объект {} с id {}", User.class.getSimpleName(), validUser.getId());
+        return validUser;
+    }
+
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable String id, @PathVariable String friendId) {
+        log.info("Получен запрос PUT к эндпоинту: /users/{}/friends/{}", id, friendId);
+        userService.addFriend(id, friendId);
+        log.info("Обновлен объект {} с id {}. Добавлен друг {}",
+                User.class.getSimpleName(), id, friendId);
+        userService.addFriend(friendId, id);
+        log.info("Обновлен объект {} с id {}. Добавлен друг {}",
+                User.class.getSimpleName(), friendId, id);
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void deleteFriend(@PathVariable String id, @PathVariable String friendId) {
+        log.info("Получен запрос DELETE к эндпоинту: /users/{}/friends/{}", id, friendId);
+        userService.deleteFriend(id, friendId);
+        log.info("Обновлен объект {} с id {}. Удален друг {}",
+                User.class.getSimpleName(), id, friendId);
     }
 }

@@ -39,7 +39,7 @@ class UserControllerTest {
     void shouldReturn200whenGetUsers() throws Exception {
         User user = new User(0,
                 "pupkin.email@mail.ru",
-                "lupkin",
+                "lupkinin",
                 "Игорь",
                 LocalDate.of(2001, 1, 1),
                 new ArrayList<>());

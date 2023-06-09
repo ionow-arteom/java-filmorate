@@ -85,7 +85,7 @@ public class UserService {
         if(user.getName() == null) {
             user.setName(user.getLogin());
             log.info("UserService: Поле name не задано. Установлено значение {} из поля login", user.getLogin());
-        }else if (user.getName().isEmpty() || user.getName().isBlank()) {
+        } else if (user.getName().isEmpty() || user.getName().isBlank()) {
             user.setName(user.getLogin());
             log.info("UserService: Поле name не содержит буквенных символов. " +
                     "Установлено значение {} из поля login", user.getLogin());

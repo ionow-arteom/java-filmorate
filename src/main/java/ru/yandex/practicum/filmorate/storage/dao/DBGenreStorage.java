@@ -29,7 +29,7 @@ public class DBGenreStorage implements GenreStorage {
     @Override
     public boolean addFilmGenres(int filmId, Collection<Genre> genres) {
         for (Genre genre : genres) {
-            String setNewGenres = "insert into GENRELINE (FILMID, GENREID) values (?, ?) ON CONFLICT DO NOTHING";
+            String setNewGenres = "MERGE INTO GENRELINE (FILMID, GENREID) KEY (FILMID, GENREID) VALUES (?, ?)\n";
             jdbcTemplate.update(setNewGenres, filmId, genre.getId());
         }
         return true;

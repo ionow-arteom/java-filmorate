@@ -65,9 +65,6 @@ public class UserController {
         userService.addFriend(id, friendId);
         log.info("Обновлен объект {} с id {}. Добавлен друг {}",
                 User.class.getSimpleName(), id, friendId);
-        userService.addFriend(friendId, id);
-        log.info("Обновлен объект {} с id {}. Добавлен друг {}",
-                User.class.getSimpleName(), friendId, id);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")

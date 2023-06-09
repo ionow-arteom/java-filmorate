@@ -25,7 +25,8 @@ public class Film {
     @Positive(message = "duration не может быть отрицательной")
     private long duration;
     private int rate;
-    private Mpa mpa = new Mpa(5, "NC-17", "Лицам до 18 лет просмотр запрещен");
+    private Mpa mpa;
+            //= new Mpa(5, "NC-17", "Лицам до 18 лет просмотр запрещен");
     private List<Genre> genres = new ArrayList<>();
     private List<Integer> likes = new ArrayList<>();
 

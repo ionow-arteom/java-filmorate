@@ -14,6 +14,7 @@ import ru.yandex.practicum.filmorate.storage.dao.DBFilmStorage;
 class FilmorateApplicationTests {
 
 	private final DBFilmStorage filmStorage;
+
 	@Test
 	void contextLoads() {
 	}

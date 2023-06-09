@@ -18,7 +18,7 @@ import java.util.*;
 public class DBUserStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
 
-    public DBUserStorage(JdbcTemplate jdbcTemplate){
+    public DBUserStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 

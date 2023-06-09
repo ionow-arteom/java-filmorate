@@ -143,6 +143,7 @@ class FilmServiceTest {
         film.setDescription("Морская пехота на обложке");
         film.setReleaseDate(LocalDate.of(2001,5,22));
         film.setDuration(200L);
+        film.setMpa(new Mpa(5, "mpa", "description"));
         Film addedFilm = service.add(film);
         assertNotEquals(0, addedFilm.getId());
     }

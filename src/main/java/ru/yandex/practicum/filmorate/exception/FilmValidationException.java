@@ -11,5 +11,7 @@ import java.util.Set;
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class FilmValidationException extends ConstraintViolationException {
     public FilmValidationException(String message, Set<ConstraintViolation<Film>> violations) {
-        super(message, violations); }
+        super(message, violations);
+    }
 }
+ё

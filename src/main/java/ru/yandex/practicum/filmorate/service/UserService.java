@@ -82,7 +82,7 @@ public class UserService {
     }
 
     private void validate(final User user) {
-        if(user.getName() == null) {
+        if (user.getName() == null) {
             user.setName(user.getLogin());
             log.info("UserService: Поле name не задано. Установлено значение {} из поля login", user.getLogin());
         } else if (user.getName().isEmpty() || user.getName().isBlank()) {

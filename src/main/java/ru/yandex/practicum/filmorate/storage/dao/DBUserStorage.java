@@ -28,8 +28,7 @@ public class DBUserStorage implements UserStorage {
         User user;
         try {
             user = jdbcTemplate.queryForObject(sqlUser, (rs, rowNum) -> makeUser(rs), id);
-        }
-        catch (EmptyResultDataAccessException e) {
+        } catch (EmptyResultDataAccessException e) {
             throw new NotFoundException("Пользователь с id " +
                     id + " не зарегистрирован!");
         }

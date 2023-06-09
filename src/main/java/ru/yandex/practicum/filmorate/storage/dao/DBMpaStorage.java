@@ -31,8 +31,7 @@ public class DBMpaStorage implements MpaStorage {
         Mpa mpa;
         try {
             mpa = jdbcTemplate.queryForObject(sqlMpa, this::makeMpa, mpaId);
-        }
-        catch (EmptyResultDataAccessException e) {
+        } catch (EmptyResultDataAccessException e) {
             throw new NotFoundException("Возрастной рейтинг с id " +
                     mpaId + " не зарегистрирован!");
         }

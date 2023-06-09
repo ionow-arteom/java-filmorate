@@ -14,4 +14,3 @@ public class FilmValidationException extends ConstraintViolationException {
         super(message, violations);
     }
 }
-ё

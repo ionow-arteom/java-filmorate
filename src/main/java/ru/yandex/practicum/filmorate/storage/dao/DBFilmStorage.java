@@ -196,6 +196,7 @@ public class DBFilmStorage implements FilmStorage {
                 "where FILMID = ?";
         return jdbcTemplate.query(sqlGenre, this::makeGenre, filmId);
     }
+
     private Genre makeGenre(ResultSet resultSet, int rowNum) throws SQLException {
         return new Genre(resultSet.getInt("GenreID"), resultSet.getString("Name"));
     }

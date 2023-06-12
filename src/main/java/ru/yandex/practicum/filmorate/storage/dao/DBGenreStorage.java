@@ -20,30 +20,6 @@ public class DBGenreStorage implements GenreStorage {
     }
 
     @Override
-    public boolean deleteFilmGenres(int filmId) {
-        String deleteOldGenres = "delete from GENRELINE where FILMID = ?";
-        jdbcTemplate.update(deleteOldGenres, filmId);
-        return true;
-    }
-
-    @Override
-    public boolean addFilmGenres(int filmId, Collection<Genre> genres) {
-        for (Genre genre : genres) {
-            String setNewGenres = "MERGE INTO GENRELINE (FILMID, GENREID) KEY (FILMID, GENREID) VALUES (?, ?)\n";
-            jdbcTemplate.update(setNewGenres, filmId, genre.getId());
-        }
-        return true;
-    }
-
-    @Override
-    public Collection<Genre> getGenresByFilmId(int filmId) {
-        String sqlGenre = "select GENRE.GENREID, NAME from GENRE " +
-                "INNER JOIN GENRELINE GL on GENRE.GENREID = GL.GENREID " +
-                "where FILMID = ?";
-        return jdbcTemplate.query(sqlGenre, this::makeGenre, filmId);
-    }
-
-    @Override
     public Collection<Genre> getAllGenres() {
         String sqlGenre = "select GENREID, NAME from GENRE ORDER BY GENREID";
         return jdbcTemplate.query(sqlGenre, this::makeGenre);

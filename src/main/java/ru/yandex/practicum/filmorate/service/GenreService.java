@@ -21,21 +21,9 @@ public class GenreService {
         return genreStorage.getAllGenres();
     }
 
-    public Collection<Genre> getFilmGenres(int filmId) {
-        return genreStorage.getGenresByFilmId(filmId);
-    }
-
     public Genre getGenre(String supposedId) {
         int genreId = intFromString(supposedId);
         return genreStorage.getGenreById(genreId);
-    }
-
-    public boolean deleteFilmGenres(int filmId) {
-        return genreStorage.deleteFilmGenres(filmId);
-    }
-
-    public boolean addFilmGenres(int filmId, Collection<Genre> genres) {
-        return genreStorage.addFilmGenres(filmId, genres);
     }
 
     private Integer intFromString(final String supposedInt) {

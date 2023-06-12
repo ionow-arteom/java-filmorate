@@ -81,5 +81,16 @@ public class ErrorHandler {
         log.warn("Ошибка запроса: {}", errors);
         return error;
     }
-
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(Exception.class)
+    public ErrorMessage handleException(Exception exception, WebRequest request) {
+        ErrorMessage error = new ErrorMessage(
+                new Date(),
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                exception.getMessage(),
+                request.getDescription(false)
+        );
+        log.error("Ошибка сервера: {} {}", exception.getMessage(), request.getDescription(false));
+        return error;
+    }
 }

@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.service.GenreService;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.sql.Date;
@@ -27,11 +26,11 @@ public class DBFilmStorage implements FilmStorage {
 
     private final Logger log = LoggerFactory.getLogger(DBFilmStorage.class);
     private final JdbcTemplate jdbcTemplate;
-    private final GenreService genreService;
 
-    public DBFilmStorage(JdbcTemplate jdbcTemplate, GenreService genreService) {
+
+    public DBFilmStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.genreService = genreService;
+
     }
 
     @Override
@@ -78,7 +77,7 @@ public class DBFilmStorage implements FilmStorage {
         int id = Objects.requireNonNull(keyHolder.getKey()).intValue();
 
         if (!film.getGenres().isEmpty()) {
-            genreService.addFilmGenres(film.getId(), film.getGenres());
+            addFilmGenres(film.getId(), film.getGenres());
         }
         if (film.getLikes() != null) {
             for (Integer userId : film.getLikes()) {
@@ -102,9 +101,9 @@ public class DBFilmStorage implements FilmStorage {
                 film.getMpa().getId(),
                 film.getId());
 
-        genreService.deleteFilmGenres(film.getId());
+        deleteFilmGenres(film.getId());
         if (!film.getGenres().isEmpty()) {
-            genreService.addFilmGenres(film.getId(), film.getGenres());
+            addFilmGenres(film.getId(), film.getGenres());
         }
 
         if (film.getLikes() != null) {
@@ -167,7 +166,7 @@ public class DBFilmStorage implements FilmStorage {
                 new Mpa(resultSet.getInt("RatingMPA.RatingID"),
                         resultSet.getString("RatingMPA.Name"),
                         resultSet.getString("RatingMPA.Description")),
-                (List<Genre>) genreService.getFilmGenres(filmId),
+                getFilmGenres(filmId),
                 getFilmLikes(filmId));
     }
 
@@ -175,5 +174,26 @@ public class DBFilmStorage implements FilmStorage {
         String sqlGetLikes = "select USERID from LIKES where FILMID = ?";
         return jdbcTemplate.queryForList(sqlGetLikes, Integer.class, filmId);
     }
+    public boolean addFilmGenres(int filmId, Collection<Genre> genres) {
+        for (Genre genre : genres) {
+            String setNewGenres = "MERGE INTO GENRELINE (FILMID, GENREID) KEY (FILMID, GENREID) VALUES (?, ?)\n";
+            jdbcTemplate.update(setNewGenres, filmId, genre.getId());
+        }
+        return true;
+    }
 
+    public boolean deleteFilmGenres(int filmId) {
+        String deleteOldGenres = "delete from GENRELINE where FILMID = ?";
+        jdbcTemplate.update(deleteOldGenres, filmId);
+        return true;
+    }
+    private List<Genre> getFilmGenres(int filmId) {
+        String sqlGenre = "select GENRE.GENREID, NAME from GENRE " +
+                "INNER JOIN GENRELINE GL on GENRE.GENREID = GL.GENREID " +
+                "where FILMID = ?";
+        return jdbcTemplate.query(sqlGenre, this::makeGenre, filmId);
+    }
+    private Genre makeGenre(ResultSet resultSet, int rowNum) throws SQLException {
+        return new Genre(resultSet.getInt("GenreID"), resultSet.getString("Name"));
+    }
 }

@@ -175,6 +175,7 @@ public class DBFilmStorage implements FilmStorage {
         return jdbcTemplate.queryForList(sqlGetLikes, Integer.class, filmId);
 
     }
+    
     public boolean addFilmGenres(int filmId, Collection<Genre> genres) {
         for (Genre genre : genres) {
             String setNewGenres = "MERGE INTO GENRELINE (FILMID, GENREID) KEY (FILMID, GENREID) VALUES (?, ?)\n";
@@ -195,7 +196,6 @@ public class DBFilmStorage implements FilmStorage {
                 "where FILMID = ?";
         return jdbcTemplate.query(sqlGenre, this::makeGenre, filmId);
     }
-    
     private Genre makeGenre(ResultSet resultSet, int rowNum) throws SQLException {
         return new Genre(resultSet.getInt("GenreID"), resultSet.getString("Name"));
     }

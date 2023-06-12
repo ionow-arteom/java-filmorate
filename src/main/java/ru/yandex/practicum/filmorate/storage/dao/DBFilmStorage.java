@@ -173,6 +173,7 @@ public class DBFilmStorage implements FilmStorage {
     private List<Integer> getFilmLikes(int filmId) {
         String sqlGetLikes = "select USERID from LIKES where FILMID = ?";
         return jdbcTemplate.queryForList(sqlGetLikes, Integer.class, filmId);
+
     }
     public boolean addFilmGenres(int filmId, Collection<Genre> genres) {
         for (Genre genre : genres) {
@@ -187,12 +188,14 @@ public class DBFilmStorage implements FilmStorage {
         jdbcTemplate.update(deleteOldGenres, filmId);
         return true;
     }
+
     private List<Genre> getFilmGenres(int filmId) {
         String sqlGenre = "select GENRE.GENREID, NAME from GENRE " +
                 "INNER JOIN GENRELINE GL on GENRE.GENREID = GL.GENREID " +
                 "where FILMID = ?";
         return jdbcTemplate.query(sqlGenre, this::makeGenre, filmId);
     }
+    
     private Genre makeGenre(ResultSet resultSet, int rowNum) throws SQLException {
         return new Genre(resultSet.getInt("GenreID"), resultSet.getString("Name"));
     }

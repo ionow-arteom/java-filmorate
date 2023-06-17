@@ -1,98 +1,127 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.WrongIdException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.UserValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.*;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
+@Slf4j
 @Service
-@RequiredArgsConstructor
 public class UserService {
+    private int increment = 0;
+    private final Validator validator;
 
     private final UserStorage userStorage;
 
-    public User save(User user) {
-        return userStorage.save(user);
+    @Autowired
+    public UserService(Validator validator,@Qualifier("DBUserStorage") UserStorage userStorage) {
+        this.validator = validator;
+        this.userStorage = userStorage;
     }
 
-    public User update(User user) {
-        return userStorage.update(user);
+    public Collection<User> getAllUsers() {
+        return userStorage.getAllUsers();
     }
 
-    public List<User> getUsers() {
-        return userStorage.getUsers();
+    public User add(final User user) {
+        validate(user);
+        return userStorage.addUser(user);
     }
 
-    public User addFriend(Long id, Long friendId) {
-        User user = userStorage.getUserById(id);
-        ValidateService.validateId(id);
-        ValidateService.validateId(friendId);
-        Set<Long> friends = user.getFriends();
-        friends.add(friendId);
-        User friend = userStorage.getUserById(friendId);
-        Set<Long> friends1 = friend.getFriends();
-        friends1.add(id);
-        userStorage.update(friend);
-        return userStorage.update(user);
+    public User update(final User user) {
+        validate(user);
+        return userStorage.updateUser(user);
     }
 
-    public User deleteFriendById(Long id, Long friendId) {
-        User user = userStorage.getUserById(id);
-        Set<Long> friends = user.getFriends();
-        friends.remove(friendId);
-        return userStorage.update(user);
+    public void addFriend(final String supposedUserId, final String supposedFriendId) {
+        User user = getStoredUser(supposedUserId);
+        User friend = getStoredUser(supposedFriendId);
+        userStorage.addFriend(user.getId(), friend.getId());
     }
 
-    public List<User> getFriendsList(Long id) {
-        List<User> users = new ArrayList<>();
+    public void deleteFriend(final String supposedUserId, final  String supposedFriendId) {
+        User user = getStoredUser(supposedUserId);
+        User friend = getStoredUser(supposedFriendId);
+        userStorage.deleteFriend(user.getId(), friend.getId());
+    }
 
-        User user = userStorage.getUserById(id);
-        Set<Long> friends = user.getFriends();
-        for (Long friendId : friends) {
-            User friend = userStorage.getUserById(friendId);
-            if (Objects.nonNull(friend)) {
-                users.add(friend);
+    public Collection<User> getFriends(final String supposedUserId) {
+        User user = getStoredUser(supposedUserId);
+        Collection<User> friends = new HashSet<>();
+        for (Integer id : user.getFriends()) {
+            friends.add(userStorage.getUser(id));
+        }
+        return friends;
+    }
+
+    public Collection<User> getCommonFriends(final String supposedUserId, final String supposedOtherId) {
+        User user = getStoredUser(supposedUserId);
+        User otherUser = getStoredUser(supposedOtherId);
+        Collection<User> commonFriends = new HashSet<>();
+        for (Integer id : user.getFriends()) {
+            if (otherUser.getFriends().contains(id)) {
+                commonFriends.add(userStorage.getUser(id));
             }
         }
-        return users;
+        return commonFriends;
     }
 
+    public User getUser(final String supposedId) {
+        return getStoredUser(supposedId);
+    }
 
-    public List<User> getCommonFriends(Long firstUserId, Long secondUserId) {
-        User firstUser = userStorage.getUserById(firstUserId);
-        User secondUser = userStorage.getUserById(secondUserId);
-
-        Set<Long> firstUserFriends = firstUser.getFriends();
-        Set<Long> secondUserFriends = secondUser.getFriends();
-
-        if (isNullOrEmpty(firstUserFriends) || isNullOrEmpty(secondUserFriends)) {
-            return Collections.emptyList();
+    private void validate(final User user) {
+        if (user.getName() == null) {
+            user.setName(user.getLogin());
+            log.info("UserService: Поле name не задано. Установлено значение {} из поля login", user.getLogin());
+        } else if (user.getName().isEmpty() || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+            log.info("UserService: Поле name не содержит буквенных символов. " +
+                    "Установлено значение {} из поля login", user.getLogin());
         }
-
-        List<Long> commonFriendIds = new ArrayList<>(firstUserFriends);
-        commonFriendIds.retainAll(secondUserFriends);
-        if (commonFriendIds.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        List<User> commonFiends = new ArrayList<>();
-        for (Long friendId : commonFriendIds) {
-            User friend = userStorage.getUserById(friendId);
-            if (Objects.nonNull(friend)) {
-                commonFiends.add(friend);
+        Set<ConstraintViolation<User>> violations = validator.validate(user);
+        if (!violations.isEmpty()) {
+            StringBuilder messageBuilder = new StringBuilder();
+            for (ConstraintViolation<User> userConstraintViolation : violations) {
+                messageBuilder.append(userConstraintViolation.getMessage());
             }
+            throw new UserValidationException("Ошибка валидации пользователя: " + messageBuilder, violations);
         }
-        return commonFiends;
+        if (user.getId() == 0) {
+            user.setId(++increment);
+        }
     }
 
-    public User getUserById(Long id) {
-
-        return userStorage.getUserById(id);
+    private Integer idFromString(final String supposedId) {
+        try {
+            return Integer.valueOf(supposedId);
+        } catch (NumberFormatException exception) {
+            return Integer.MIN_VALUE;
+        }
     }
 
-    private boolean isNullOrEmpty(Set<Long> friendIds) {
-        return Objects.isNull(friendIds) || friendIds.isEmpty();
+    private User getStoredUser(final String supposedId) {
+        final int userId = idFromString(supposedId);
+        if (userId == Integer.MIN_VALUE) {
+            throw new WrongIdException("Не удалось распознать идентификатор пользователя: " +
+                    "значение " + supposedId);
+        }
+        User user = userStorage.getUser(userId);
+        if (user == null) {
+            throw new NotFoundException("Пользователь с идентификатором " +
+                    userId + " не зарегистрирован!");
+        }
+        return user;
     }
 }
